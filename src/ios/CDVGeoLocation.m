@@ -17,7 +17,7 @@
  under the License.
  */
 
-#import "CDVLocation.h"
+#import "CDVGeoLocation.h"
 #import <Cordova/NSArray+Comparisons.h>
 
 #pragma mark Constants
@@ -31,12 +31,12 @@
 #pragma mark -
 #pragma mark Categories
 
-@implementation CDVLocationData
+@implementation CDVGeoLocationData
 
 @synthesize locationStatus, locationInfo, locationCallbacks, watchCallbacks;
-- (CDVLocationData*)init
+- (CDVGeoLocationData*)init
 {
-    self = (CDVLocationData*)[super init];
+    self = (CDVGeoLocationData*)[super init];
     if (self) {
         self.locationInfo = nil;
         self.locationCallbacks = nil;
@@ -50,13 +50,13 @@
 #pragma mark -
 #pragma mark CDVLocation
 
-@implementation CDVLocation
+@implementation CDVGoeLocation
 
 @synthesize locationManager, locationData;
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
-    self = (CDVLocation*)[super initWithWebView:(UIWebView*)theWebView];
+    self = (CDVGeoLocation*)[super initWithWebView:(UIWebView*)theWebView];
     if (self) {
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.delegate = self; // Tells the location manager to send updates to this object
@@ -176,7 +176,7 @@
     didUpdateToLocation:(CLLocation*)newLocation
            fromLocation:(CLLocation*)oldLocation
 {
-    CDVLocationData* cData = self.locationData;
+    CDVGeoLocationData* cData = self.locationData;
 
     cData.locationInfo = newLocation;
     if (self.locationData.locationCallbacks.count > 0) {
@@ -209,9 +209,9 @@
         [self.commandDelegate sendPluginResult:result callbackId:callbackId];
     } else {
         if (!self.locationData) {
-            self.locationData = [[CDVLocationData alloc] init];
+            self.locationData = [[CDVGeoLocationData alloc] init];
         }
-        CDVLocationData* lData = self.locationData;
+        CDVGeoLocationData* lData = self.locationData;
         if (!lData.locationCallbacks) {
             lData.locationCallbacks = [NSMutableArray arrayWithCapacity:1];
         }
@@ -236,9 +236,9 @@
     BOOL enableHighAccuracy = [[command argumentAtIndex:1] boolValue];
 
     if (!self.locationData) {
-        self.locationData = [[CDVLocationData alloc] init];
+        self.locationData = [[CDVGeoLocationData alloc] init];
     }
-    CDVLocationData* lData = self.locationData;
+    CDVGeoLocationData* lData = self.locationData;
 
     if (!lData.watchCallbacks) {
         lData.watchCallbacks = [NSMutableDictionary dictionaryWithCapacity:1];
@@ -281,7 +281,7 @@
 - (void)returnLocationInfo:(NSString*)callbackId andKeepCallback:(BOOL)keepCallback
 {
     CDVPluginResult* result = nil;
-    CDVLocationData* lData = self.locationData;
+    CDVGeoLocationData* lData = self.locationData;
 
     if (lData && !lData.locationInfo) {
         // return error
@@ -330,7 +330,7 @@
 {
     NSLog(@"locationManager::didFailWithError %@", [error localizedFailureReason]);
 
-    CDVLocationData* lData = self.locationData;
+    CDVGeoLocationData* lData = self.locationData;
     if (lData && __locationStarted) {
         // TODO: probably have to once over the various error codes and return one of:
         // PositionError.PERMISSION_DENIED = 1;
