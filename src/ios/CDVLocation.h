@@ -21,36 +21,36 @@
 #import <CoreLocation/CoreLocation.h>
 #import <Cordova/CDVPlugin.h>
 
-enum CDVGeoLocationStatus {
+enum CDVLocationStatus {
     PERMISSIONDENIED = 1,
     POSITIONUNAVAILABLE,
     TIMEOUT
 };
-typedef NSUInteger CDVGeoLocationStatus;
+typedef NSUInteger CDVLocationStatus;
 
 // simple object to keep track of location information
-@interface CDVGeoLocationData : NSObject {
-    CDVGeoLocationStatus locationStatus;
+@interface CDVLocationData : NSObject {
+    CDVLocationStatus locationStatus;
     NSMutableArray* locationCallbacks;
     NSMutableDictionary* watchCallbacks;
     CLLocation* locationInfo;
 }
 
-@property (nonatomic, assign) CDVGeoLocationStatus locationStatus;
+@property (nonatomic, assign) CDVLocationStatus locationStatus;
 @property (nonatomic, strong) CLLocation* locationInfo;
 @property (nonatomic, strong) NSMutableArray* locationCallbacks;
 @property (nonatomic, strong) NSMutableDictionary* watchCallbacks;
 
 @end
 
-@interface CDVGeoLocation : CDVPlugin <CLLocationManagerDelegate>{
+@interface CDVLocation : CDVPlugin <CLLocationManagerDelegate>{
     @private BOOL __locationStarted;
     @private BOOL __highAccuracyEnabled;
-    CDVGeoLocationData* locationData;
+    CDVLocationData* locationData;
 }
 
 @property (nonatomic, strong) CLLocationManager* locationManager;
-@property (nonatomic, strong) CDVGeoLocationData* locationData;
+@property (nonatomic, strong) CDVLocationData* locationData;
 
 - (void)getLocation:(CDVInvokedUrlCommand*)command;
 - (void)addWatch:(CDVInvokedUrlCommand*)command;

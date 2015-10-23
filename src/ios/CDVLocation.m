@@ -17,7 +17,7 @@
  under the License.
  */
 
-#import "CDVGeoLocation.h"
+#import "CDVLocation.h"
 #import <Cordova/NSArray+Comparisons.h>
 
 #pragma mark Constants
@@ -31,12 +31,12 @@
 #pragma mark -
 #pragma mark Categories
 
-@implementation CDVGeoLocationData
+@implementation CDVLocationData
 
 @synthesize locationStatus, locationInfo, locationCallbacks, watchCallbacks;
-- (CDVGeoLocationData*)init
+- (CDVLocationData*)init
 {
-    self = (CDVGeoLocationData*)[super init];
+    self = (CDVLocationData*)[super init];
     if (self) {
         self.locationInfo = nil;
         self.locationCallbacks = nil;
@@ -50,13 +50,13 @@
 #pragma mark -
 #pragma mark CDVLocation
 
-@implementation CDVGeoLocation
+@implementation CDVLocation
 
 @synthesize locationManager, locationData;
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
-    self = (CDVGeoLocation*)[super initWithWebView:(UIWebView*)theWebView];
+    self = (CDVLocation*)[super initWithWebView:(UIWebView*)theWebView];
     if (self) {
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.delegate = self; // Tells the location manager to send updates to this object
@@ -137,7 +137,7 @@
         return;
     }
 #endif
-    
+
     // Tell the location manager to start notifying us of location updates. We
     // first stop, and then start the updating to ensure we get at least one
     // update, even if our location did not change.
@@ -176,7 +176,7 @@
     didUpdateToLocation:(CLLocation*)newLocation
            fromLocation:(CLLocation*)oldLocation
 {
-    CDVGeoLocationData* cData = self.locationData;
+    CDVLocationData* cData = self.locationData;
 
     cData.locationInfo = newLocation;
     if (self.locationData.locationCallbacks.count > 0) {
@@ -209,9 +209,9 @@
         [self.commandDelegate sendPluginResult:result callbackId:callbackId];
     } else {
         if (!self.locationData) {
-            self.locationData = [[CDVGeoLocationData alloc] init];
+            self.locationData = [[CDVLocationData alloc] init];
         }
-        CDVGeoLocationData* lData = self.locationData;
+        CDVLocationData* lData = self.locationData;
         if (!lData.locationCallbacks) {
             lData.locationCallbacks = [NSMutableArray arrayWithCapacity:1];
         }
@@ -236,9 +236,9 @@
     BOOL enableHighAccuracy = [[command argumentAtIndex:1] boolValue];
 
     if (!self.locationData) {
-        self.locationData = [[CDVGeoLocationData alloc] init];
+        self.locationData = [[CDVLocationData alloc] init];
     }
-    CDVGeoLocationData* lData = self.locationData;
+    CDVLocationData* lData = self.locationData;
 
     if (!lData.watchCallbacks) {
         lData.watchCallbacks = [NSMutableDictionary dictionaryWithCapacity:1];
@@ -281,7 +281,7 @@
 - (void)returnLocationInfo:(NSString*)callbackId andKeepCallback:(BOOL)keepCallback
 {
     CDVPluginResult* result = nil;
-    CDVGeoLocationData* lData = self.locationData;
+    CDVLocationData* lData = self.locationData;
 
     if (lData && !lData.locationInfo) {
         // return error
@@ -299,13 +299,103 @@
         [returnInfo setObject:[NSNumber numberWithDouble:lInfo.coordinate.latitude] forKey:@"latitude"];
         [returnInfo setObject:[NSNumber numberWithDouble:lInfo.coordinate.longitude] forKey:@"longitude"];
 
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:returnInfo];
-        [result setKeepCallbackAsBool:keepCallback];
+//        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:returnInfo];
+        [self getLocationFromCLLocation:lInfo callbackId:callbackId keepCallback:keepCallback];
+//        [result setKeepCallbackAsBool:keepCallback];
     }
     if (result) {
-        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+//        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
     }
 }
+
+- (void)getLocationFromCLLocation:(CLLocation*)cllocation callbackId:(NSString*)callbackId keepCallback:(BOOL)keepCallback
+{
+
+    NSString *currentLatitude = [[NSString alloc]
+                                 initWithFormat:@"%g",cllocation.coordinate.latitude];
+    NSString *currentLongitude = [[NSString alloc]
+                                  initWithFormat:@"%g",cllocation.coordinate.longitude];
+
+    NSString *url = [NSString
+                     stringWithFormat: @"http://apis.map.qq.com/ws/geocoder/v1/?location=%@,%@&key=%@",
+                     currentLatitude,
+                     currentLongitude,
+                     @"QJWBZ-Q6AHD-PQV47-PVTCE-AMWL3-DUBQI"
+                     ];
+
+    NSMutableURLRequest *request = [NSMutableURLRequest
+                                    requestWithURL:[NSURL URLWithString:url]
+                                    cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData
+                                    timeoutInterval:10
+                                    ];
+
+    [request setHTTPMethod: @"GET"];
+
+    NSError *requestError = nil;
+    NSError *parseError = nil;
+    NSURLResponse *urlResponse = nil;
+    CDVPluginResult *pluginResult;
+
+
+    NSData *regionResponse = [NSURLConnection
+                              sendSynchronousRequest:request
+                              returningResponse:&urlResponse
+                              error:&requestError
+                              ];
+
+    if (requestError) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"failed"];
+        return;
+    }
+    NSString *aString = [[NSString alloc] initWithData:regionResponse encoding:NSUTF8StringEncoding];
+    NSLog(@"regionResponse is %@", aString);
+
+    NSDictionary* regionInfo = [NSJSONSerialization
+                                JSONObjectWithData:regionResponse
+                                options:NSJSONReadingAllowFragments
+                                error:&parseError
+                                ];
+
+    if (parseError) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"failed"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+        return;
+    }
+
+    if ([regionInfo[@"status"] isEqualToNumber:@0]) {
+
+        NSMutableDictionary* returnInfo = [NSMutableDictionary dictionaryWithCapacity:10];
+        NSNumber* timestamp = [NSNumber numberWithDouble:([cllocation.timestamp timeIntervalSince1970] * 1000)];
+        [returnInfo setObject:timestamp forKey:@"timestamp"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.speed] forKey:@"velocity"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.verticalAccuracy] forKey:@"altitudeAccuracy"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.horizontalAccuracy] forKey:@"accuracy"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.course] forKey:@"heading"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.altitude] forKey:@"altitude"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.coordinate.latitude] forKey:@"latitude"];
+        [returnInfo setObject:[NSNumber numberWithDouble:cllocation.coordinate.longitude] forKey:@"longitude"];
+        [returnInfo setObject:regionInfo[@"result"][@"ad_info"][@"adcode"] forKey:@"cityCode"];
+        [returnInfo setObject:regionInfo[@"result"][@"ad_info"][@"city"] forKey:@"cityName"];
+
+
+        NSString* location = [NSString stringWithFormat:
+                              @"{'longitude':%@,'latitude':%@,'cityCode':%@,'cityName':%@}",
+                              currentLongitude, currentLatitude,
+                              regionInfo[@"result"][@"ad_info"][@"adcode"],
+                              regionInfo[@"result"][@"ad_info"][@"city"]];
+        NSLog(@"location info=%@", location);
+
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:returnInfo];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"failed"];
+    }
+    [pluginResult setKeepCallbackAsBool:keepCallback];
+
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+
+
+}
+
 
 - (void)returnLocationError:(NSUInteger)errorCode withMessage:(NSString*)message
 {
@@ -330,7 +420,7 @@
 {
     NSLog(@"locationManager::didFailWithError %@", [error localizedFailureReason]);
 
-    CDVGeoLocationData* lData = self.locationData;
+    CDVLocationData* lData = self.locationData;
     if (lData && __locationStarted) {
         // TODO: probably have to once over the various error codes and return one of:
         // PositionError.PERMISSION_DENIED = 1;

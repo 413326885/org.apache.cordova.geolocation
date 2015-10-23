@@ -100,7 +100,9 @@ var geolocation = {
                     accuracy:p.accuracy,
                     heading:p.heading,
                     velocity:p.velocity,
-                    altitudeAccuracy:p.altitudeAccuracy
+                    altitudeAccuracy:p.altitudeAccuracy,
+                    cityCode: p.cityCode,
+                    cityName: p.cityName
                 },
                 (p.timestamp === undefined ? new Date() : ((p.timestamp instanceof Date) ? p.timestamp : new Date(p.timestamp)))
             );
@@ -182,7 +184,9 @@ var geolocation = {
                     accuracy:p.accuracy,
                     heading:p.heading,
                     velocity:p.velocity,
-                    altitudeAccuracy:p.altitudeAccuracy
+                    altitudeAccuracy:p.altitudeAccuracy,
+                    cityCode: p.cityCode,
+                    cityName: p.cityName
                 },
                 (p.timestamp === undefined ? new Date() : ((p.timestamp instanceof Date) ? p.timestamp : new Date(p.timestamp)))
             );

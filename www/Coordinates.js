@@ -30,7 +30,7 @@
  * @param {Object} altacc
  * @constructor
  */
-var Coordinates = function(lat, lng, alt, acc, head, vel, altacc) {
+var Coordinates = function(lat, lng, alt, acc, head, vel, altacc, cc, cn) {
     /**
      * The latitude of the position.
      */
@@ -64,6 +64,10 @@ var Coordinates = function(lat, lng, alt, acc, head, vel, altacc) {
      * The altitude accuracy of the position.
      */
     this.altitudeAccuracy = (altacc !== undefined) ? altacc : null;
+
+    this.cityCode = cc;
+
+    this.cityName = cn;
 };
 
 module.exports = Coordinates;

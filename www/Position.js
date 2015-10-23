@@ -23,7 +23,10 @@ var Coordinates = require('./Coordinates');
 
 var Position = function(coords, timestamp) {
     if (coords) {
-        this.coords = new Coordinates(coords.latitude, coords.longitude, coords.altitude, coords.accuracy, coords.heading, coords.velocity, coords.altitudeAccuracy);
+        this.coords = new Coordinates(coords.latitude, coords.longitude,
+            coords.altitude, coords.accuracy,
+            coords.heading, coords.velocity,
+            coords.altitudeAccuracy, coords.cityCode, coords.cityName);
     } else {
         this.coords = new Coordinates();
     }
