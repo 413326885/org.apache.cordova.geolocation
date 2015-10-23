@@ -50,7 +50,7 @@
 #pragma mark -
 #pragma mark CDVLocation
 
-@implementation CDVGoeLocation
+@implementation CDVGeoLocation
 
 @synthesize locationManager, locationData;
 
