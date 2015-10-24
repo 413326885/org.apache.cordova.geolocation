@@ -50,13 +50,13 @@
 #pragma mark -
 #pragma mark CDVLocation
 
-@implementation CDVLocation
+@implementation CDVGeoLocation
 
 @synthesize locationManager, locationData, locationKey;
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
-    self = (CDVLocation*)[super initWithWebView:(UIWebView*)theWebView];
+    self = (CDVGeoLocation*)[super initWithWebView:(UIWebView*)theWebView];
     if (self) {
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.delegate = self; // Tells the location manager to send updates to this object
