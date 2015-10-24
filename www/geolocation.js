@@ -32,7 +32,8 @@ function parseParameters(options) {
     var opt = {
         maximumAge: 0,
         enableHighAccuracy: false,
-        timeout: Infinity
+        timeout: Infinity,
+        key: ''
     };
 
     if (options) {
@@ -49,6 +50,7 @@ function parseParameters(options) {
                 opt.timeout = options.timeout;
             }
         }
+        opt.key = options.key;
     }
 
     return opt;
@@ -141,7 +143,7 @@ var geolocation = {
                 // always truthy before we call into native
                 timeoutTimer.timer = true;
             }
-            exec(win, fail, "Geolocation", "getLocation", [options.enableHighAccuracy, options.maximumAge]);
+            exec(win, fail, "Geolocation", "getLocation", [options.enableHighAccuracy, options.maximumAge, options.key]);
         }
         return timeoutTimer;
     },
