@@ -44,7 +44,7 @@ typedef NSUInteger CDVLocationStatus;
 
 @end
 
-@interface CDVGeoLocation : CDVPlugin <CLLocationManagerDelegate>{
+@interface CDVLocation : CDVPlugin <CLLocationManagerDelegate>{
 @private BOOL __locationStarted;
 @private BOOL __highAccuracyEnabled;
     CDVLocationData* locationData;

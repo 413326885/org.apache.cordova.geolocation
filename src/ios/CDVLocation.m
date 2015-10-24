@@ -17,7 +17,7 @@
  under the License.
  */
 
-#import "CDVGeoLocation.h"
+#import "CDVLocation.h"
 #import <Cordova/NSArray+Comparisons.h>
 
 #pragma mark Constants
@@ -50,13 +50,13 @@
 #pragma mark -
 #pragma mark CDVLocation
 
-@implementation CDVGeoLocation
+@implementation CDVLocation
 
 @synthesize locationManager, locationData, locationKey;
 
 - (CDVPlugin*)initWithWebView:(UIWebView*)theWebView
 {
-    self = (CDVGeoLocation*)[super initWithWebView:(UIWebView*)theWebView];
+    self = (CDVLocation*)[super initWithWebView:(UIWebView*)theWebView];
     if (self) {
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.delegate = self; // Tells the location manager to send updates to this object
