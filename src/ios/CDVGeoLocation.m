@@ -17,7 +17,7 @@
  under the License.
  */
 
-#import "CDVLocation.h"
+#import "CDVGeoLocation.h"
 #import <Cordova/NSArray+Comparisons.h>
 
 #pragma mark Constants
